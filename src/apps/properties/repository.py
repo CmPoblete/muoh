@@ -5,6 +5,7 @@ class PropertiesRepository:
     db = properties
 
     def __new__(cls):
+        """Creates a singleton"""
         if not hasattr(cls, "_instance"):
             cls._instance = super(PropertiesRepository, cls).__new__(cls)
         return cls._instance
