@@ -1,4 +1,3 @@
-from typing import Any
 from src.apps.properties.repository import PropertiesRepository
 from src.apps.properties.service import PropertiesService
 from fastapi import APIRouter, Depends
