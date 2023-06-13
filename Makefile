@@ -3,8 +3,8 @@
 
 SHELL := /bin/bash
 
-DEV_COMPOSE := @docker-compose --project-name collection-local -f .docker/docker-compose.yml
-TEST_COMPOSE := @docker-compose --project-name collection-local-test -f .docker/docker-compose.test.yml
+DEV_COMPOSE := @docker-compose --project-name muoh -f .docker/docker-compose.yml
+TEST_COMPOSE := @docker-compose --project-name muoh-test -f .docker/docker-compose.test.yml
 
 
 .PHONY: help rebuild build up run stop down down-tests down-all build-test stop-test run-tests test migrate apply-migrations
@@ -46,7 +46,7 @@ test:
 	$(MAKE) stop-test
 
 migrate: ## Generate migrations e.g. make migrate msg='migration'
-	$(DEV_COMPOSE) run --rm collection-test sh -c 'alembic revision --autogenerate -m "${msg}"'
+	$(DEV_COMPOSE) run --rm api sh -c 'alembic revision --autogenerate -m "${msg}"'
 
 apply-migrations: ## Generate migrations
-	$(DEV_COMPOSE) run --rm collection-test sh -c 'alembic upgrade head'
+	$(DEV_COMPOSE) run --rm api sh -c 'alembic upgrade head'

@@ -1,4 +1,8 @@
-from src.apps.properties.repository import PropertiesRepository
+from src.apps.properties.models import CreateProperty, Property
+from src.apps.properties.repository import (
+    PropertiesRepository,
+    PropertiesRepositorySQLAlchemy,
+)
 from src.apps.properties.service import PropertiesService
 from fastapi import APIRouter, Depends
 
@@ -11,7 +15,7 @@ def get_properties(
     service: PropertiesService = Depends(
         lambda: PropertiesService(repository=PropertiesRepository())
     ),
-) -> list[dict]:
+) -> list[Property]:
     if name:
         return service.filter_by_name(name=name)
     return service.get_all()
@@ -23,26 +27,15 @@ def get_properties_by_id(
     service: PropertiesService = Depends(
         lambda: PropertiesService(repository=PropertiesRepository())
     ),
-) -> dict | None:
+) -> Property | None:
     return service.get_by_id(id=property_id)
 
 
 @router.post("/properties")
 def create_property(
-    property_data: dict,
+    property_data: CreateProperty,
     service: PropertiesService = Depends(
-        lambda: PropertiesService(repository=PropertiesRepository())
+        lambda: PropertiesService(repository=PropertiesRepository(())),
     ),
-) -> list[dict]:
+) -> list[Property]:
     return service.create_property(property_data=property_data)
-
-
-@router.patch("/properties/{property_id}")
-def update_property(
-    property_id: int,
-    property_data: dict,
-    service: PropertiesService = Depends(
-        lambda: PropertiesService(repository=PropertiesRepository())
-    ),
-) -> dict:
-    return service.update_property_by_id(id=property_id, property_data=property_data)
