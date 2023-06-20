@@ -13,7 +13,7 @@ router = APIRouter()
 def get_properties(
     name: str | None = None,
     service: PropertiesService = Depends(
-        lambda: PropertiesService(repository=PropertiesRepository())
+        lambda: PropertiesService(repository=PropertiesRepositorySQLAlchemy())
     ),
 ) -> list[Property]:
     if name:
@@ -25,7 +25,7 @@ def get_properties(
 def get_properties_by_id(
     property_id: int,
     service: PropertiesService = Depends(
-        lambda: PropertiesService(repository=PropertiesRepository())
+        lambda: PropertiesService(repository=PropertiesRepositorySQLAlchemy())
     ),
 ) -> Property | None:
     return service.get_by_id(id=property_id)
@@ -35,7 +35,7 @@ def get_properties_by_id(
 def create_property(
     property_data: CreateProperty,
     service: PropertiesService = Depends(
-        lambda: PropertiesService(repository=PropertiesRepository(())),
+        lambda: PropertiesService(repository=PropertiesRepositorySQLAlchemy()),
     ),
 ) -> list[Property]:
     return service.create_property(property_data=property_data)
