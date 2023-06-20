@@ -4,6 +4,7 @@ from src.db.sqlalchemy import engine
 from src.apps.properties.models import CreateProperty, Property
 from src.apps.properties.orm_models import Property as ORMProperty
 from src.db.db import properties
+from src.db.mongo import muoh_db
 
 
 class PropertiesRepository:
@@ -52,7 +53,7 @@ class PropertiesRepositorySQLAlchemy:
             ]
 
     @classmethod
-    def create_property(self, property_data: CreateProperty) -> list[Property]:
+    def create_property(cls, property_data: CreateProperty) -> list[Property]:
         with Session(engine) as session:
             property_obj = ORMProperty(**property_data.dict())
             session.add(property_obj)
@@ -60,3 +61,23 @@ class PropertiesRepositorySQLAlchemy:
             return [
                 Property.from_orm(prop) for prop in session.query(ORMProperty).all()
             ]
+
+
+class PropertiesRepositoryMongo:
+    collection = muoh_db.get_collection("properties")
+
+    @classmethod
+    def get_all(cls) -> list[Property]:
+        properties = cls.collection.find()
+        return [Property(**prop) for prop in properties]
+
+    @classmethod
+    def filter(cls, attribute: str, param: int | str) -> list[Property | None]:
+        properties = cls.collection.find({attribute: param})
+        return [Property(**prop) for prop in properties]
+
+    @classmethod
+    def create_property(cls, property_data: CreateProperty) -> list[Property]:
+        property_obj = property_data.dict()
+        cls.collection.insert_one(property_obj)
+        return [Property(**prop) for prop in cls.collection.find()]
