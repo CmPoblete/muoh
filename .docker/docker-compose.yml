@@ -7,6 +7,7 @@ services:
       dockerfile: .docker/dockerfile
     depends_on:
       - muoh-db
+      - mongodb
     environment:
       COLLECTIONS_DATABASE_URL: "postgresql://postgres:postgres@muoh-db:5432/muoh"
     ports:
@@ -36,7 +37,16 @@ services:
       - api-network
     volumes:
       - db-data:/var/lib/postgresql/data
+  mongodb:
+    image: "mongo:latest"
+    ports:
+      - "27017:27017"
+    networks:
+      - api-network
+    volumes:
+      - mongo-data:/data/db
 volumes:
   db-data:
+  mongo-data:
 networks:
   api-network:
