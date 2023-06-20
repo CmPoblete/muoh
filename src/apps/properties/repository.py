@@ -1,3 +1,8 @@
+from sqlalchemy.orm import Session
+
+from src.db.sqlalchemy import engine
+from src.apps.properties.models import CreateProperty, Property
+from src.apps.properties.orm_models import Property as ORMProperty
 from src.db.db import properties
 
 
@@ -11,21 +16,47 @@ class PropertiesRepository:
         return cls._instance
 
     @classmethod
-    def get_all(cls) -> list[dict]:
-        return cls.db
+    def get_all(cls) -> list[Property]:
+        return [Property(**prop) for prop in cls.db]
 
     @classmethod
-    def filter(cls, attribute: str, param: int | str) -> list[dict | None]:
+    def filter(cls, attribute: str, param: int | str) -> list[Property | None]:
         if isinstance(param, str):
-            return list(filter(lambda prop: param in prop[attribute], cls.db))
-        return list(filter(lambda prop: prop[attribute] == param, cls.db))
+            properties = filter(lambda prop: param in prop[attribute], cls.db)
+        else:
+            properties = filter(lambda prop: prop[attribute] == param, cls.db)
+        return [Property(**prop) for prop in properties if prop is not None]
 
     @classmethod
-    def create_property(cls, property_data: dict) -> list[dict]:
-        cls.db.append(property_data)
-        return cls.db
+    def create_property(cls, property_data: CreateProperty) -> list[Property]:
+        cls.db.append(property_data.dict())
+        return [Property(**prop) for prop in cls.db]
+
+
+class PropertiesRepositorySQLAlchemy:
+    @classmethod
+    def get_all(cls) -> list[Property]:
+        with Session(engine) as session:
+            return [
+                Property.from_orm(prop) for prop in session.query(ORMProperty).all()
+            ]
 
     @classmethod
-    def update_property(cls, prop_obj: dict, property_data: dict) -> dict:
-        prop_obj.update(property_data)
-        return prop_obj
+    def filter(cls, attribute: str, param: int | str) -> list[Property | None]:
+        with Session(engine) as session:
+            return [
+                Property.from_orm(prop)
+                for prop in session.query(ORMProperty)
+                .filter(getattr(ORMProperty, attribute) == param)
+                .all()
+            ]
+
+    @classmethod
+    def create_property(self, property_data: CreateProperty) -> list[Property]:
+        with Session(engine) as session:
+            property_obj = ORMProperty(**property_data.dict())
+            session.add(property_obj)
+            session.commit()
+            return [
+                Property.from_orm(prop) for prop in session.query(ORMProperty).all()
+            ]
