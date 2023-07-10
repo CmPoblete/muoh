@@ -1,9 +1,11 @@
-from src.apps.properties.models import CreateProperty, Property
-from src.apps.properties.repository import (
-    PropertiesRepository,
+from src.apps.properties.domain.models import CreateProperty, Property
+from src.apps.properties.infrastructure.repository import (
     PropertiesRepositorySQLAlchemy,
 )
-from src.apps.properties.service import PropertiesService
+from src.apps.properties.infrastructure.integrations.payments import (
+    PropertyPaymentsIntegration,
+)
+from src.apps.properties.application.service import PropertiesService
 from fastapi import APIRouter, Depends
 
 router = APIRouter()
@@ -39,3 +41,16 @@ def create_property(
     ),
 ) -> list[Property]:
     return service.create_property(property_data=property_data)
+
+
+@router.delete("/properties/{property_id}")
+def delete_property(
+    property_id: int,
+    service: PropertiesService = Depends(
+        lambda: PropertiesService(
+            repository=PropertiesRepositorySQLAlchemy(),
+            property_payment_repository=PropertyPaymentsIntegration(),
+        )
+    ),
+) -> dict:
+    return {"id": service.delete_property(property_id=property_id)}
