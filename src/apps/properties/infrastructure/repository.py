@@ -1,12 +1,14 @@
 from sqlalchemy.orm import Session
 
 from src.db.sqlalchemy import engine
-from src.apps.properties.models import CreateProperty, Property
-from src.apps.properties.orm_models import Property as ORMProperty
+from src.apps.properties.domain.models import CreateProperty, Property
+from src.apps.properties.infrastructure.orm_models import Property as ORMProperty
+from src.apps.properties.domain.repository import PropertiesRepositoryInterface
 from src.db.db import properties
 
 
-class PropertiesRepository:
+# Mongo
+class PropertiesRepository(PropertiesRepositoryInterface):
     db = properties
 
     def __new__(cls):
@@ -33,7 +35,10 @@ class PropertiesRepository:
         return [Property(**prop) for prop in cls.db]
 
 
-class PropertiesRepositorySQLAlchemy:
+# PostgreSQL
+
+
+class PropertiesRepositorySQLAlchemy(PropertiesRepositoryInterface):
     @classmethod
     def get_all(cls) -> list[Property]:
         with Session(engine) as session:
@@ -60,3 +65,15 @@ class PropertiesRepositorySQLAlchemy:
             return [
                 Property.from_orm(prop) for prop in session.query(ORMProperty).all()
             ]
+
+    @classmethod
+    def delete_property(self, property_instance: Property) -> int:
+        with Session(engine) as session:
+            property_obj = (
+                session.query(ORMProperty)
+                .filter(ORMProperty.id == property_instance.id)
+                .first()
+            )
+            session.delete(property_obj)
+            session.commit()
+            return property_instance.id

@@ -21,7 +21,7 @@ if config.config_file_name is not None:
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
-from src.apps.properties.orm_models import Property
+from src.apps.properties.infrastructure.orm_models import Property
 from src.db.sqlalchemy import Base
 
 target_metadata = Base.metadata
