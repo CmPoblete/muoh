@@ -62,9 +62,7 @@ class PropertiesRepositorySQLAlchemy(PropertiesRepositoryInterface):
             property_obj = ORMProperty(**property_data.dict())
             session.add(property_obj)
             session.commit()
-            return [
-                Property.from_orm(prop) for prop in session.query(ORMProperty).all()
-            ]
+            return Property.from_orm(property_obj)
 
     @classmethod
     def delete_property(self, property_instance: Property) -> int:
