@@ -21,11 +21,11 @@ class PropertiesService:
     def get_all(self) -> Property:
         return self.repository.get_all()
 
-    def get_by_id(self, id: int) -> Property | None:
+    def get_by_id(self, id: int) -> Property:
         property_query = self.repository.filter(attribute="id", param=id)
         if property_query:
             return property_query[0]
-        return None
+        raise PropertyNotFoundException(property_id=id)
 
     def filter_by_name(self, name: str) -> list[Property | None]:
         return self.repository.filter(attribute="name", param=name)

@@ -29,7 +29,7 @@ def get_properties_by_id(
     service: PropertiesService = Depends(
         lambda: PropertiesService(repository=PropertiesRepositorySQLAlchemy())
     ),
-) -> Property | None:
+) -> Property:
     return service.get_by_id(id=property_id)
 
 
@@ -39,7 +39,7 @@ def create_property(
     service: PropertiesService = Depends(
         lambda: PropertiesService(repository=PropertiesRepositorySQLAlchemy()),
     ),
-) -> list[Property]:
+) -> Property:
     return service.create_property(property_data=property_data)
 
 
